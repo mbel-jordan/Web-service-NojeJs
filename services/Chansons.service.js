@@ -2,6 +2,7 @@ const db = require ('./db.service')
 const helper = require('../helper')
 const config = require('../config')
 
+
 async function getListOfSongs(page = 1) {
     const offset = helper.getOffset(page, config.listPerPage);
     const rows = await db.query(
@@ -34,9 +35,12 @@ async function getSongById(songId, page = 1) {
 
 async function addSong(songData) {
     const { titreChanson, nomArtiste, nomsaArtistescCollaborateurs, pochetteAlbum, chansonUrl,lyrics, prix } = songData;
+    const ArtistescCollaborateurs = nomsaArtistescCollaborateurs.split('\n').map(artist => artist.trim());
+
+
     const result = await db.query(
         'INSERT INTO chansons (titreChanson, nomArtiste, nomsaArtistescCollaborateurs, pochetteAlbum,chansonUrl ,lyrics, prix) VALUES (?, ?, ?, ?,?, ?, ?)',
-        [titreChanson, nomArtiste, JSON.stringify(nomsaArtistescCollaborateurs), pochetteAlbum,chansonUrl, lyrics, prix]
+        [titreChanson, nomArtiste, JSON.stringify(ArtistescCollaborateurs), pochetteAlbum,chansonUrl, lyrics, prix]
     );
     const newSongId = result.insertId;
     const newSong = await getSongById(newSongId);
@@ -48,10 +52,11 @@ async function addSong(songData) {
 
 async function updateSong(songId, updatedSongData) {
     const { titreChanson, nomArtiste, nomsaArtistescCollaborateurs, pochetteAlbum, chansonUrl,lyrics, prix } = updatedSongData;
+    const ArtistescCollaborateurs = nomsaArtistescCollaborateurs.split('\n').map(artist => artist.trim());
 
     const result = await db.query(
         'UPDATE chansons SET titreChanson = ?, nomArtiste = ?, nomsaArtistescCollaborateurs = ?, pochetteAlbum = ?,chansonUrl = ?, lyrics = ?, prix = ? WHERE id = ?',
-        [titreChanson, nomArtiste, JSON.stringify(nomsaArtistescCollaborateurs), pochetteAlbum, chansonUrl,lyrics, prix, songId]
+        [titreChanson, nomArtiste, JSON.stringify(ArtistescCollaborateurs), pochetteAlbum, chansonUrl,lyrics, prix, songId]
     );
 
     if (result.affectedRows === 0) {
